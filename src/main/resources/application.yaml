@@ -1,0 +1,59 @@
+spring:
+  application:
+    name: task-management-api
+
+  # MongoDB Atlas Configuration
+  data:
+    mongodb:
+      uri: mongodb+srv://haithem:haithem%4012345@cluster0.zfotvps.mongodb.net/taskdb?retryWrites=true&w=majority&appName=Cluster0
+
+  # CORS Configuration (if needed globally)
+  web:
+    cors:
+      allowed-origins:
+        - http://localhost:4200
+        - http://localhost:4200/
+      allowed-methods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - OPTIONS
+        - PATCH
+      allowed-headers: "*"
+      allow-credentials: true
+      max-age: 3600
+
+# Server Configuration
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: on_param
+    include-exception: false
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    org.springframework.data.mongodb: DEBUG
+    org.springframework.web: DEBUG
+    com.example.taskmanagement: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/task-management.log
+
+
+# Management Endpoints (Actuator - Optional)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+
