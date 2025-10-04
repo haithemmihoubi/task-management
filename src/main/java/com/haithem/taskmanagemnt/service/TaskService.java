@@ -4,6 +4,7 @@ import com.haithem.taskmanagemnt.dto.TaskFilterRequest;
 import com.haithem.taskmanagemnt.dto.TaskRequest;
 import com.haithem.taskmanagemnt.dto.TaskResponse;
 import com.haithem.taskmanagemnt.exception.ResourceNotFoundException;
+import com.haithem.taskmanagemnt.mapper.TaskMapper;
 import com.haithem.taskmanagemnt.model.Task;
 import com.haithem.taskmanagemnt.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 
 /**
  * Service layer for Task operations
+ * Uses MapStruct for DTO mapping
  */
 @Slf4j
 @Service
@@ -27,6 +29,7 @@ public class TaskService {
 
     private final TaskRepository taskRepository;
     private final MongoTemplate mongoTemplate;
+    private final TaskMapper taskMapper;
 
     /**
      * Create a new task
@@ -34,18 +37,11 @@ public class TaskService {
     public TaskResponse createTask(TaskRequest request) {
         log.info("Creating new task with title: {}", request.getTitle());
 
-        Task task = Task.builder()
-                .title(request.getTitle())
-                .description(request.getDescription())
-                .status(request.getStatus())
-                .priority(request.getPriority())
-                .dueDate(request.getDueDate())
-                .build();
-
+        Task task = taskMapper.toEntity(request);
         Task savedTask = taskRepository.save(task);
-        log.info("Task created successfully with id: {}", savedTask.getId());
 
-        return mapToResponse(savedTask);
+        log.info("Task created successfully with id: {}", savedTask.getId());
+        return taskMapper.toResponse(savedTask);
     }
 
     /**
@@ -97,7 +93,7 @@ public class TaskService {
         log.info("Found {} tasks matching the criteria", tasks.size());
 
         return tasks.stream()
-                .map(this::mapToResponse)
+                .map(taskMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
@@ -110,7 +106,7 @@ public class TaskService {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + id));
 
-        return mapToResponse(task);
+        return taskMapper.toResponse(task);
     }
 
     /**
@@ -122,20 +118,15 @@ public class TaskService {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + id));
 
-        task.setTitle(request.getTitle());
-        task.setDescription(request.getDescription());
-        task.setStatus(request.getStatus());
-        task.setPriority(request.getPriority());
-        task.setDueDate(request.getDueDate());
-
+        taskMapper.updateEntityFromRequest(request, task);
         Task updatedTask = taskRepository.save(task);
-        log.info("Task updated successfully with id: {}", updatedTask.getId());
 
-        return mapToResponse(updatedTask);
+        log.info("Task updated successfully with id: {}", updatedTask.getId());
+        return taskMapper.toResponse(updatedTask);
     }
 
     /**
-     * Delete a task
+     * Delete  th  task
      */
     public void deleteTask(String id) {
         log.info("Deleting task with id: {}", id);
@@ -147,19 +138,4 @@ public class TaskService {
         taskRepository.deleteById(id);
         log.info("Task deleted successfully with id: {}", id);
     }
-
-    /**
-     * Map Task entity to TaskResponse DTO
-     */
-    private TaskResponse mapToResponse(Task task) {
-        return TaskResponse.builder()
-                .id(task.getId())
-                .title(task.getTitle())
-                .description(task.getDescription())
-                .status(task.getStatus())
-                .priority(task.getPriority())
-                .dueDate(task.getDueDate())
-                .build();
-    }
 }
-

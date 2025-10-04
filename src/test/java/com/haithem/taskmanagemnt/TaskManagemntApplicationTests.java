@@ -6,14 +6,14 @@ import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest
 @TestPropertySource(properties = {
-    "spring.data.mongodb.uri=mongodb://localhost:27017/test-taskdb",
-    "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.mongo.embedded.EmbeddedMongoAutoConfiguration"
-})
+    "spring.data.mongodb.uri=mongodb://localhost:27017/test-taskdb",})
 class TaskManagemntApplicationTests {
 
     @Test
     void contextLoads() {
         // This test verifies that the application context loads successfully
+
+
     }
 
 }

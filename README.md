@@ -2,7 +2,7 @@
 
 A production-ready RESTful API built with Spring Boot 3.5.6 and MongoDB for managing tasks with advanced filtering capabilities.
 
-## 🚀 Features
+## Features
 
 - ✅ **Complete CRUD Operations** - Create, Read, Update, Delete tasks
 - ✅ **Advanced Filtering** - Filter by status, priority, date range
@@ -15,13 +15,13 @@ A production-ready RESTful API built with Spring Boot 3.5.6 and MongoDB for mana
 - ✅ **Comprehensive Tests** - Unit tests for service and controller layers
 - ✅ **Postman Collection** - 25 ready-to-use API requests
 
-## 📋 Requirements
+## Requirements
 
 - Java 21
 - Maven 3.6+
 - MongoDB Atlas account (or local MongoDB)
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 - **Framework**: Spring Boot 3.5.6
 - **Database**: MongoDB
@@ -29,15 +29,19 @@ A production-ready RESTful API built with Spring Boot 3.5.6 and MongoDB for mana
 - **Testing**: JUnit 5, Mockito, Spring Test
 - **Documentation**: Postman Collection
 
-## 📦 Installation
+## Installation
 
 ### 1. Clone the repository
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/haithemmihoubi/task-management
 cd task-managemnt
 ```
 
-### 2. Configure MongoDB
+### 2. Configure MongoDB or use MongoDB Atlas   
+#  I'm using mongo atlas for this project
+- If using MongoDB Atlas, create a cluster and get the connection string.
+- If using local MongoDB, ensure it's running on default port `27017`.
+- 
 Update `src/main/resources/application.yaml` with your MongoDB connection string:
 ```yaml
 spring:

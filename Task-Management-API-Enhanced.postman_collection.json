@@ -1,0 +1,858 @@
+{
+	"info": {
+		"_postman_id": "b2c3d4e5-f6g7-8901-bcde-fg2345678901",
+		"name": "Task Management API v1 - Enhanced",
+		"description": "Complete Postman collection for Task Management REST API with Spring Boot and MongoDB.\n\n## New Features:\n- ✅ Rate Limiting (100 requests/minute per IP)\n- ✅ Audit Fields (createdBy, updatedBy, createdAt, updatedAt)\n- ✅ MapStruct DTO Mapping\n- ✅ Swagger/OpenAPI Documentation\n- ✅ Custom Validation Annotations\n- ✅ Environment-Specific Configurations\n\n## Quick Links:\n- Swagger UI: http://localhost:8080/swagger-ui.html\n- API Docs: http://localhost:8080/v3/api-docs\n- Health Check: http://localhost:8080/actuator/health",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "enhanced-2024"
+	},
+	"item": [
+		{
+			"name": "Tasks",
+			"item": [
+				{
+					"name": "Create Task",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"taskId\", jsonData.id);",
+									"    pm.test(\"Task created successfully\", function () {",
+									"        pm.response.to.have.status(201);",
+									"    });",
+									"    pm.test(\"Response has audit fields\", function () {",
+									"        pm.expect(jsonData).to.have.property('createdAt');",
+									"        pm.expect(jsonData).to.have.property('createdBy');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Complete Project Documentation\",\n    \"description\": \"Write comprehensive documentation for the task management API including setup instructions and API usage examples\",\n    \"status\": \"TODO\",\n    \"priority\": 1,\n    \"dueDate\": \"2025-12-31\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tasks",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tasks"
+							]
+						},
+						"description": "Creates a new task with the provided details.\n\n**Request Body:**\n- `title` (required): Task title (1-200 characters)\n- `description` (optional): Task description (max 1000 characters)\n- `status` (required): TODO, IN_PROGRESS, or COMPLETED\n- `priority` (required): Priority level (1-5)\n- `dueDate` (optional): Due date in YYYY-MM-DD format\n\n**Response includes audit fields:**\n- `createdAt`: Timestamp of creation\n- `updatedAt`: Timestamp of last update\n- `createdBy`: User who created the task\n- `updatedBy`: User who last updated the task"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Tasks",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is an array\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"Tasks have audit fields\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.length > 0) {",
+									"        pm.expect(jsonData[0]).to.have.property('createdAt');",
+									"        pm.expect(jsonData[0]).to.have.property('updatedAt');",
+									"        pm.expect(jsonData[0]).to.have.property('createdBy');",
+									"        pm.expect(jsonData[0]).to.have.property('updatedBy');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tasks?sortBy=dueDate&sortDirection=asc",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tasks"
+							],
+							"query": [
+								{
+									"key": "sortBy",
+									"value": "dueDate",
+									"description": "Sort field (dueDate, priority, createdAt, updatedAt)"
+								},
+								{
+									"key": "sortDirection",
+									"value": "asc",
+									"description": "Sort direction (asc or desc)"
+								},
+								{
+									"key": "status",
+									"value": "TODO",
+									"description": "Filter by status",
+									"disabled": true
+								},
+								{
+									"key": "priority",
+									"value": "1",
+									"description": "Filter by priority",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "documentation",
+									"description": "Search in title and description",
+									"disabled": true
+								},
+								{
+									"key": "dueDateFrom",
+									"value": "2025-01-01",
+									"description": "Filter from date",
+									"disabled": true
+								},
+								{
+									"key": "dueDateTo",
+									"value": "2025-12-31",
+									"description": "Filter to date",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Retrieves all tasks with optional filtering and sorting.\n\n**Query Parameters:**\n- `status`: Filter by task status (TODO, IN_PROGRESS, COMPLETED)\n- `priority`: Filter by priority level (1-5)\n- `dueDateFrom`: Filter tasks from this date (YYYY-MM-DD)\n- `dueDateTo`: Filter tasks until this date (YYYY-MM-DD)\n- `search`: Search term for title and description\n- `sortBy`: Sort field (dueDate, priority, createdAt, updatedAt)\n- `sortDirection`: Sort direction (asc or desc)\n\n**All responses include audit fields for tracking.**"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Task by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has all fields including audit\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('title');",
+									"    pm.expect(jsonData).to.have.property('createdAt');",
+									"    pm.expect(jsonData).to.have.property('updatedAt');",
+									"    pm.expect(jsonData).to.have.property('createdBy');",
+									"    pm.expect(jsonData).to.have.property('updatedBy');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tasks/{{taskId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tasks",
+								"{{taskId}}"
+							]
+						},
+						"description": "Retrieves a specific task by its unique identifier.\n\n**Path Parameter:**\n- `id`: Task ID (MongoDB ObjectId)\n\n**Response includes:**\n- All task fields\n- Audit fields (createdAt, updatedAt, createdBy, updatedBy)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Task",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Task updated successfully\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('updatedAt');",
+									"    pm.expect(jsonData).to.have.property('updatedBy');",
+									"});",
+									"",
+									"pm.test(\"UpdatedAt is different from createdAt\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.createdAt && jsonData.updatedAt) {",
+									"        pm.expect(jsonData.updatedAt).to.not.equal(jsonData.createdAt);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Complete Project Documentation - Updated\",\n    \"description\": \"Updated: Write comprehensive documentation with examples and diagrams\",\n    \"status\": \"IN_PROGRESS\",\n    \"priority\": 2,\n    \"dueDate\": \"2025-12-31\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tasks/{{taskId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tasks",
+								"{{taskId}}"
+							]
+						},
+						"description": "Updates an existing task with new details using MapStruct for efficient mapping.\n\n**Request Body:** Same as Create Task\n\n**Audit Behavior:**\n- `updatedAt` is automatically updated\n- `updatedBy` is set to current user (currently 'system')\n- `createdAt` and `createdBy` remain unchanged"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Task",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204\", function () {",
+									"    pm.response.to.have.status(204);",
+									"});",
+									"",
+									"pm.test(\"Response body is empty\", function () {",
+									"    pm.expect(pm.response.text()).to.equal('');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tasks/{{taskId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tasks",
+								"{{taskId}}"
+							]
+						},
+						"description": "Permanently deletes a task by its ID.\n\n**Returns:** 204 No Content on success"
+					},
+					"response": []
+				},
+				{
+					"name": "Filter by Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tasks?status=TODO",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tasks"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "TODO"
+								}
+							]
+						},
+						"description": "Get all tasks with TODO status."
+					},
+					"response": []
+				},
+				{
+					"name": "Filter by Priority",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tasks?priority=1&sortBy=dueDate&sortDirection=asc",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tasks"
+							],
+							"query": [
+								{
+									"key": "priority",
+									"value": "1"
+								},
+								{
+									"key": "sortBy",
+									"value": "dueDate"
+								},
+								{
+									"key": "sortDirection",
+									"value": "asc"
+								}
+							]
+						},
+						"description": "Get all high priority (1) tasks sorted by due date."
+					},
+					"response": []
+				},
+				{
+					"name": "Filter by Date Range",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tasks?dueDateFrom=2025-01-01&dueDateTo=2025-12-31",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tasks"
+							],
+							"query": [
+								{
+									"key": "dueDateFrom",
+									"value": "2025-01-01"
+								},
+								{
+									"key": "dueDateTo",
+									"value": "2025-12-31"
+								}
+							]
+						},
+						"description": "Get tasks with due dates in 2025."
+					},
+					"response": []
+				},
+				{
+					"name": "Search Tasks",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tasks?search=documentation",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tasks"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "documentation"
+								}
+							]
+						},
+						"description": "Search for tasks containing 'documentation' in title or description (case-insensitive)."
+					},
+					"response": []
+				},
+				{
+					"name": "Combined Filters",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tasks?status=IN_PROGRESS&priority=1&search=project&sortBy=priority&sortDirection=desc",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tasks"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "IN_PROGRESS"
+								},
+								{
+									"key": "priority",
+									"value": "1"
+								},
+								{
+									"key": "search",
+									"value": "project"
+								},
+								{
+									"key": "sortBy",
+									"value": "priority"
+								},
+								{
+									"key": "sortDirection",
+									"value": "desc"
+								}
+							]
+						},
+						"description": "Advanced filtering: IN_PROGRESS tasks with priority 1, containing 'project', sorted by priority descending."
+					},
+					"response": []
+				}
+			],
+			"description": "All task management endpoints with CRUD operations, filtering, and sorting capabilities.\n\n**New Features:**\n- All responses include audit fields\n- MapStruct handles DTO conversions\n- Rate limiting applies (100 req/min)"
+		},
+		{
+			"name": "Validation Tests",
+			"item": [
+				{
+					"name": "Invalid Priority (too high)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Error message mentions priority\", function () {",
+									"    var responseText = pm.response.text();",
+									"    pm.expect(responseText.toLowerCase()).to.include('priority');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Test Task\",\n    \"description\": \"Testing validation\",\n    \"status\": \"TODO\",\n    \"priority\": 10,\n    \"dueDate\": \"2025-12-31\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tasks",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tasks"
+							]
+						},
+						"description": "Tests custom @ValidPriority annotation - should fail with priority > 5"
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Status",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Test Task\",\n    \"description\": \"Testing validation\",\n    \"status\": \"INVALID_STATUS\",\n    \"priority\": 1,\n    \"dueDate\": \"2025-12-31\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tasks",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tasks"
+							]
+						},
+						"description": "Tests custom @ValidTaskStatus annotation - should fail with invalid status"
+					},
+					"response": []
+				},
+				{
+					"name": "Missing Required Fields",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"Testing validation without required fields\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tasks",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tasks"
+							]
+						},
+						"description": "Tests validation - should fail without title, status, and priority"
+					},
+					"response": []
+				},
+				{
+					"name": "Title Too Long",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"This is a very long title that exceeds the maximum allowed length of 200 characters. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\",\n    \"status\": \"TODO\",\n    \"priority\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tasks",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tasks"
+							]
+						},
+						"description": "Tests @Size validation - title should not exceed 200 characters"
+					},
+					"response": []
+				}
+			],
+			"description": "Tests for custom validation annotations and built-in validations"
+		},
+		{
+			"name": "Rate Limiting Tests",
+			"item": [
+				{
+					"name": "Test Rate Limit",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Send multiple requests to test rate limiting",
+									"pm.sendRequest(pm.request.url, function (err, response) {",
+									"    console.log('Request 1:', response.code);",
+									"});",
+									"",
+									"pm.sendRequest(pm.request.url, function (err, response) {",
+									"    console.log('Request 2:', response.code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Rate limit info available\", function () {",
+									"    // After 100 requests from same IP, should get 429",
+									"    pm.expect([200, 429]).to.include(pm.response.code);",
+									"});",
+									"",
+									"if (pm.response.code === 429) {",
+									"    pm.test(\"Rate limit error message\", function () {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.error).to.include('Too many requests');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/tasks",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"tasks"
+							]
+						},
+						"description": "Tests rate limiting - after 100 requests per minute from same IP, returns 429.\n\n**Rate Limit:** 100 requests/minute per IP\n**Response on exceeded:** HTTP 429 with error message"
+					},
+					"response": []
+				}
+			],
+			"description": "Tests for rate limiting functionality (Bucket4j implementation)"
+		},
+		{
+			"name": "Monitoring & Health",
+			"item": [
+				{
+					"name": "Health Check",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Application is UP\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.equal('UP');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/actuator/health",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"actuator",
+								"health"
+							]
+						},
+						"description": "Spring Boot Actuator health check endpoint"
+					},
+					"response": []
+				},
+				{
+					"name": "Application Info",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/actuator/info",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"actuator",
+								"info"
+							]
+						},
+						"description": "Application information endpoint"
+					},
+					"response": []
+				},
+				{
+					"name": "Metrics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/actuator/metrics",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"actuator",
+								"metrics"
+							]
+						},
+						"description": "Application metrics endpoint"
+					},
+					"response": []
+				}
+			],
+			"description": "Spring Boot Actuator endpoints for monitoring"
+		},
+		{
+			"name": "Documentation",
+			"item": [
+				{
+					"name": "OpenAPI Docs (JSON)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/v3/api-docs",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v3",
+								"api-docs"
+							]
+						},
+						"description": "Get OpenAPI 3.0 specification in JSON format"
+					},
+					"response": []
+				},
+				{
+					"name": "Swagger UI",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/swagger-ui.html",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"swagger-ui.html"
+							]
+						},
+						"description": "Access interactive Swagger UI documentation.\n\nNote: This is an HTML page, open in browser for best experience."
+					},
+					"response": []
+				}
+			],
+			"description": "API documentation endpoints (Swagger/OpenAPI)"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global pre-request script",
+					"console.log('Request to:', pm.request.url);"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global test script",
+					"pm.test(\"Response time is acceptable\", function () {",
+					"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+					"});"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "taskId",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
+

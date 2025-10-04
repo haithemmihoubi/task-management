@@ -1,0 +1,52 @@
+# Development Environment Configuration
+spring:
+  application:
+    name: task-management-api-dev
+
+  # MongoDB Development Configuration
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb+srv://haithem:haithem%4012345@cluster0.zfotvps.mongodb.net/taskdb-dev?retryWrites=true&w=majority&appName=Cluster0}
+
+# Server Configuration
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: on_param
+    include-exception: true
+
+# Logging Configuration (More verbose for development)
+logging:
+  level:
+    root: INFO
+    org.springframework.data.mongodb: DEBUG
+    org.springframework.web: DEBUG
+    com.haithem.taskmanagemnt: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Springdoc OpenAPI Configuration
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: alpha
+    tags-sorter: alpha
+    display-request-duration: true
+    try-it-out-enabled: true
+
+# Management Endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,env,loggers
+  endpoint:
+    health:
+      show-details: always
+
