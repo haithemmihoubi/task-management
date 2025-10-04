@@ -7,9 +7,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * DTO for task responses
+ * Includes audit fields for tracking
  */
 @Data
 @Builder
@@ -23,5 +25,6 @@ public class TaskResponse {
     private TaskStatus status;
     private Integer priority;
     private LocalDate dueDate;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }
-

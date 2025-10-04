@@ -1,0 +1,53 @@
+# Production Environment Configuration
+spring:
+  application:
+    name: task-management-api
+
+  # MongoDB Production Configuration
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb+srv://username:password@cluster.mongodb.net/taskdb-prod?retryWrites=true&w=majority}
+
+# Server Configuration
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    include-message: always
+    include-binding-errors: never
+    include-stacktrace: never
+    include-exception: false
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+
+# Logging Configuration (Less verbose for production)
+logging:
+  level:
+    root: WARN
+    org.springframework.data.mongodb: INFO
+    org.springframework.web: INFO
+    com.haithem.taskmanagemnt: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+  file:
+    name: /var/log/task-management/app.log
+    max-size: 10MB
+    max-history: 30
+
+# Springdoc OpenAPI Configuration (Disabled in production for security)
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+# Management Endpoints (Restricted in production)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+
