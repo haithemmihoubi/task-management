@@ -5,7 +5,9 @@ spring:
   # MongoDB Atlas Configuration
   data:
     mongodb:
-      uri: mongodb+srv://haithem:haithem%4012345@cluster0.zfotvps.mongodb.net/taskdb?retryWrites=true&w=majority&appName=Cluster0
+      # Option 1: Use environment variables (recommended)
+      uri: ${MONGODB_URI:mongodb+srv://haithem:haithem%4012345@cluster0.zfotvps.mongodb.net/taskdb?retryWrites=true&w=majority&appName=Cluster0}
+      # To use environment variable, set: export MONGODB_URI="your-connection-string"
 
   # CORS Configuration (if needed globally)
   web:
@@ -56,4 +58,3 @@ management:
   endpoint:
     health:
       show-details: when-authorized
-
